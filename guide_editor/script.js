@@ -31,7 +31,8 @@ window.onload = function() {
 			let imgId = imgList[k].id.substring(3).padStart(2, '0');
 			if (!inputBox.value.includes('\\x' + imgId)) {
 				document.getElementById('images').removeChild(imgList[k]);
-				let jsonImgs = JSON.parse(getCookie('imgs'));
+				let cookieImgs = getCookie('imgs');
+				let jsonImgs = JSON.parse(cookieImgs == '' ? '[]' : cookieImgs);
 				for (let i = 0; i < jsonImgs.length; i++) {
 					if (jsonImgs[i].id == parseInt(imgId)) {
 						document.cookie = 'imgs=' + JSON.stringify(jsonImgs.splice(i, 1));
@@ -231,7 +232,7 @@ document.getElementById('book').addEventListener('drop', (event) => {
 		// Save to cookies
 		let cookieImgs = getCookie('imgs');
 		let jsonImgs = JSON.parse(cookieImgs == '' ? '[]' : cookieImgs);
-		jsonImgs.push({id:parseInt(newImg.id.substring(3)),data:UrlEncodeBase64(newImg.src.replace('data:image/png;base64,'))});
+		jsonImgs.push({id:parseInt(newImg.id.substring(3)),data:UrlEncodeBase64(newImg.src.replace('data:image/png;base64,', ''))});
 		document.cookie = 'imgs=' + JSON.stringify(jsonImgs);
 		
 		// Divide by 2 to apply page zoom
