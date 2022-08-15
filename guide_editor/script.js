@@ -4,6 +4,47 @@ var caretOn = false;
 var caretTime = 0;
 var currentPage = 0;
 
+// ONLOAD AND LOOP
+window.onload = function() {
+	inputBox.value = getCookie('text');
+	function update() {
+		updateInOut(document.getElementById('page1'));
+		currentPage++;
+		updateInOut(document.getElementById('page2'));
+		currentPage--;
+		
+		// Remove useless images
+		let imgList = document.getElementById('images').childNodes;
+		for (let k = 0; k < imgList.length; k++) {
+			let imgId = imgList[k].id.substring(3).padStart(2, '0');
+			if (!inputBox.value.includes('\\x' + imgId)) {
+				document.getElementById('images').removeChild(imgList[k]);
+			}
+		}
+		
+		// Save input to cookies
+		document.cookie = "text=" + inputBox.value;
+		
+		caretTime++;
+		if (caretTime % 25 == 0) {
+			caretTime = 0;
+			caretOn = !caretOn;
+		}
+	}
+	setInterval(update, 20);
+}
+
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
 function updateInOut(outDisplay) {
 	let bookCode = inputBox.value;
 	let displayedTxt = '<a>';
@@ -35,6 +76,33 @@ function updateInOut(outDisplay) {
 				currentColor = 0;
 				displayedTxt = changeFormatting(displayedTxt, currentColor, formattingCodes);
 				i++;
+			} else if (bookCode[i + 1] == 'x') {
+				i += 2;
+				let imgId = parseInt(bookCode.substring(i, i + 2));
+				let imgList = document.getElementById('images').childNodes;
+				let imgElem;
+				for (let k = 0; k < imgList.length; k++) {
+					if (imgId == parseInt(imgList[k].id.substring(3))) {
+						imgElem = imgList[k];
+					}
+				}
+				if (imgElem === undefined) {
+					i += 7;
+				} else {
+					imgElem.style.display = 'block';
+					i += 2;
+					let newXimg = parseInt(bookCode.substring(i, i + 3));
+					if (newXimg < 0) newXimg = 0;
+					if (newXimg > 159) newXimg = 159;
+					if (currentPage % 2 == 1) newXimg += 160;
+					imgElem.style.left = newXimg.toString() + "px";
+					i += 3;
+					let newYimg = parseInt(bookCode.substring(i, i + 3));
+					if (newYimg < 0) newYimg = 0;
+					if (newYimg > 233) newYimg = 233;
+					imgElem.style.top = newYimg.toString() + "px";
+					i += 2;
+				}
 			} else if (bookCode.charCodeAt(i + 1) >= 107 && bookCode.charCodeAt(i + 1) <= 111) {
 				if (!formattingCodes.includes(bookCode[i + 1])) {
 					formattingCodes.push(bookCode[i + 1]);
@@ -97,32 +165,123 @@ function changeFormatting(str, color, formats) {
 	return str + "'>";
 }
 
+// ARROWS
 document.getElementById('leftarrow').onclick = function() {
 	if (currentPage > 1) currentPage -= 2;
+	let imgList = document.getElementById('images').childNodes;
+	for (let k = 0; k < imgList.length; k++) {
+		imgList[k].style.display = 'none';
+	}
 	document.getElementById('pagenum').innerHTML = currentPage.toString() + '-' + (currentPage + 1).toString();
 	flipAudio.play();
 }
 document.getElementById('rightarrow').onclick = function() {
 	currentPage += 2;
+	let imgList = document.getElementById('images').childNodes;
+	for (let k = 0; k < imgList.length; k++) {
+		imgList[k].style.display = 'none';
+	}
 	document.getElementById('pagenum').innerHTML = currentPage.toString() + '-' + (currentPage + 1).toString();
 	flipAudio.play();
 }
 
-window.onload = function() {
-	inputBox.value = document.cookie.substring(5).slice(0, -1);
-	function update() {
-		updateInOut(document.getElementById('page1'));
-		currentPage++;
-		updateInOut(document.getElementById('page2'));
-		currentPage--;
+// DRAG&DROP FEATURE
+document.getElementById('book').addEventListener('dragover', (event) => {
+	event.stopPropagation();
+	event.preventDefault();
+	event.dataTransfer.dropEffect = 'copy';
+});
+document.getElementById('book').addEventListener('drop', (event) => {
+	event.stopPropagation();
+	event.preventDefault();
+	const fileList = event.dataTransfer.files;
+	const reader = new FileReader();
+	reader.addEventListener('load', (loadEvent) => {
+		let newImg = document.createElement('img');
+		newImg.id = 'img' + document.getElementById('images').childElementCount;
+		newImg.src = loadEvent.target.result;
+		// Divide by 2 to apply page zoom
+		let xPos = Math.floor(Math.min(Math.max(event.pageX / 2, 0), 319));
+		let yPos = Math.floor(Math.min(Math.max(event.pageY / 2, 0), 233));
+		newImg.style.left = xPos.toString() + 'px';
+		newImg.style.top = yPos.toString() + 'px';
+		newImg.classList.add('movable');
+		document.getElementById('images').appendChild(newImg);
 		
-		document.cookie = "text=" + inputBox.value + ";";
+		let imgPage = currentPage;
+		if (xPos >= 160) imgPage++;
 		
-		caretTime++;
-		if (caretTime % 25 == 0) {
-			caretTime = 0;
-			caretOn = !caretOn;
+		let bookCode = inputBox.value;
+		let bookCodePageOffset = 0;
+		let offsetPageCheck = 0;
+		for (let i = 0; offsetPageCheck < imgPage; i++) {
+			if (i == bookCode.length) {
+				bookCodePageOffset = bookCode.length;
+				break;
+			}
+			if ((i == 0 || bookCode[i - 1] != '\\') && i != bookCode.length - 1
+				&& bookCode[i] == '\\' && bookCode[i + 1] == 'p') {
+				bookCodePageOffset = i + 2;
+				offsetPageCheck++;
+			}
 		}
+		while(offsetPageCheck < imgPage) {
+			bookCode += '\n\\p';
+			bookCodePageOffset = bookCode.length;
+			offsetPageCheck++;
+		}
+		
+		inputBox.value = bookCode.substring(0, bookCodePageOffset)
+			+ '\\x' + newImg.id.substring(3).toString().padStart(2, '0')
+			+ (xPos >= 160 ? xPos - 160 : xPos).toString().padStart(3, '0')
+			+ yPos.toString().padStart(3, '0') + bookCode.substring(bookCodePageOffset, bookCode.length);
+		makeDraggable(newImg);
+	});
+	reader.readAsDataURL(fileList[0]);
+});
+function makeDraggable(elmnt) {
+	var startMousePosX = 0, startMousePosY = 0;
+	elmnt.onmousedown = dragMouseDown;
+
+	function dragMouseDown(e) {
+		e.preventDefault();
+		startMousePosX = e.clientX / 2 - elmnt.offsetLeft;
+		startMousePosY = e.clientY / 2 - elmnt.offsetTop;
+		document.onmouseup = closeDragElement;
+		document.onmousemove = elementDrag;
 	}
-	setInterval(update, 20);
- }
+
+	function elementDrag(e) {
+		e.preventDefault();
+		let newPosX = Math.floor(e.clientX / 2 - startMousePosX);
+		let newPosY = Math.floor(e.clientY / 2 - startMousePosY);
+		let bookCode = inputBox.value;
+		for (let i = 0; i < bookCode.length; i++) {
+			if ((i == 0 || bookCode[i - 1] != '\\') && i != bookCode.length - 1
+				&& bookCode[i] == '\\' && bookCode[i + 1] == 'x') {
+				i += 2;
+				if (parseInt(bookCode.substring(i, i + 2)) == parseInt(elmnt.id.substring(3))) {
+					i += 2;
+					if ((elmnt.offsetLeft < 160 && newPosX >= 0 && newPosX < 160) ||
+						(elmnt.offsetLeft >= 160 && newPosX >= 160 && newPosX <= 319)) {
+						elmnt.style.left = newPosX + "px";
+						bookCode = bookCode.substring(0, i) + (newPosX >= 160 ? newPosX - 160 : newPosX).toString().padStart(3, '0') + bookCode.substring(i + 3);
+					}
+					i += 3;
+					if (newPosY >= 0 && newPosY <= 233) {
+						elmnt.style.top = newPosY + "px";
+						bookCode = bookCode.substring(0, i) + newPosY.toString().padStart(3, '0') + bookCode.substring(i + 3);
+					}
+					break;
+				}
+			}
+		}
+		inputBox.value = bookCode;
+	}
+
+	function closeDragElement() {
+		// stop moving when mouse button is released
+		document.onmouseup = null;
+		document.onmousemove = null;
+	}
+}

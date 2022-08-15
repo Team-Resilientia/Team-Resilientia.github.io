@@ -77,3 +77,6 @@ img {
 	left: 538px;
 	top: 30px;
 }
+.movable {
+	cursor: move;
+}
