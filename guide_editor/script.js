@@ -6,7 +6,19 @@ var currentPage = 0;
 
 // ONLOAD AND LOOP
 window.onload = function() {
+	// Load data from cookies
 	inputBox.value = getCookie('text');
+	let cookieImgs = getCookie('imgs');
+	let jsonImgs = JSON.parse(cookieImgs == '' ? '[]' : cookieImgs);
+	for (let i = 0; i < jsonImgs.length; i++) {
+		let newImg = document.createElement('img');
+		newImg.id = 'img' + jsonImgs[i].id;
+		newImg.src = 'data:image/png;base64,' + UrlDecodeBase64(jsonImgs[i].data);
+		newImg.style.display = 'none';
+		newImg.classList.add('movable');
+		document.getElementById('images').appendChild(newImg);
+	}
+	
 	function update() {
 		updateInOut(document.getElementById('page1'));
 		currentPage++;
@@ -19,11 +31,18 @@ window.onload = function() {
 			let imgId = imgList[k].id.substring(3).padStart(2, '0');
 			if (!inputBox.value.includes('\\x' + imgId)) {
 				document.getElementById('images').removeChild(imgList[k]);
+				let jsonImgs = JSON.parse(getCookie('imgs'));
+				for (let i = 0; i < jsonImgs.length; i++) {
+					if (jsonImgs[i].id == parseInt(imgId)) {
+						document.cookie = 'imgs=' + JSON.stringify(jsonImgs.splice(i, 1));
+						break;
+					}
+				}
 			}
 		}
 		
 		// Save input to cookies
-		document.cookie = "text=" + inputBox.value;
+		document.cookie = 'text=' + inputBox.value;
 		
 		caretTime++;
 		if (caretTime % 25 == 0) {
@@ -35,14 +54,22 @@ window.onload = function() {
 }
 
 function getCookie(name) {
-    var nameEQ = name + "=";
+    var nameEQ = name + '=';
     var ca = document.cookie.split(';');
     for(var i=0;i < ca.length;i++) {
         var c = ca[i];
         while (c.charAt(0)==' ') c = c.substring(1,c.length);
         if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
     }
-    return null;
+    return '';
+}
+
+function UrlEncodeBase64(base64Input) {
+	return base64Input.replace('+', '.').replace('/', '_').replace('=', '-');
+}
+
+function UrlDecodeBase64(encodedBase64Input) {
+	return encodedBase64Input.replace('.', '+').replace('_', '/').replace('-', '=');
 }
 
 function updateInOut(outDisplay) {
@@ -69,7 +96,7 @@ function updateInOut(outDisplay) {
 		if ((i == 0 || bookCode[i - 1] != '\\') && i != bookCode.length - 1 && bookCode[i] == '\\') {
 			if (bookCode[i + 1] == 'p') break;
 			if (bookCode[i + 1] == 'q') {
-				displayedTxt += "</br>";
+				displayedTxt += '</br>';
 				i++;
 			} else if (bookCode[i + 1] == 'r') {
 				formattingCodes = [];
@@ -95,12 +122,12 @@ function updateInOut(outDisplay) {
 					if (newXimg < 0) newXimg = 0;
 					if (newXimg > 159) newXimg = 159;
 					if (currentPage % 2 == 1) newXimg += 160;
-					imgElem.style.left = newXimg.toString() + "px";
+					imgElem.style.left = newXimg.toString() + 'px';
 					i += 3;
 					let newYimg = parseInt(bookCode.substring(i, i + 3));
 					if (newYimg < 0) newYimg = 0;
 					if (newYimg > 233) newYimg = 233;
-					imgElem.style.top = newYimg.toString() + "px";
+					imgElem.style.top = newYimg.toString() + 'px';
 					i += 2;
 				}
 			} else if (bookCode.charCodeAt(i + 1) >= 107 && bookCode.charCodeAt(i + 1) <= 111) {
@@ -123,9 +150,9 @@ function updateInOut(outDisplay) {
 			}
 		} else {
 			if (bookCode.charCodeAt(i) == 10) {
-				displayedTxt += "</br>";
+				displayedTxt += '</br>';
 			} else if (bookCode.charCodeAt(i) == 32) {
-				displayedTxt += "&nbsp;";
+				displayedTxt += '&nbsp;';
 			} else {
 				if (formattingCodes.includes('k')) {
 					displayedTxt += String.fromCharCode(Math.floor(Math.random() * 94) + 33);
@@ -200,6 +227,13 @@ document.getElementById('book').addEventListener('drop', (event) => {
 		let newImg = document.createElement('img');
 		newImg.id = 'img' + document.getElementById('images').childElementCount;
 		newImg.src = loadEvent.target.result;
+		
+		// Save to cookies
+		let cookieImgs = getCookie('imgs');
+		let jsonImgs = JSON.parse(cookieImgs == '' ? '[]' : cookieImgs);
+		jsonImgs.push({id:parseInt(newImg.id.substring(3)),data:UrlEncodeBase64(newImg.src.replace('data:image/png;base64,'))});
+		document.cookie = 'imgs=' + JSON.stringify(jsonImgs);
+		
 		// Divide by 2 to apply page zoom
 		let xPos = Math.floor(Math.min(Math.max(event.pageX / 2, 0), 319));
 		let yPos = Math.floor(Math.min(Math.max(event.pageY / 2, 0), 233));
@@ -264,12 +298,12 @@ function makeDraggable(elmnt) {
 					i += 2;
 					if ((elmnt.offsetLeft < 160 && newPosX >= 0 && newPosX < 160) ||
 						(elmnt.offsetLeft >= 160 && newPosX >= 160 && newPosX <= 319)) {
-						elmnt.style.left = newPosX + "px";
+						elmnt.style.left = newPosX + 'px';
 						bookCode = bookCode.substring(0, i) + (newPosX >= 160 ? newPosX - 160 : newPosX).toString().padStart(3, '0') + bookCode.substring(i + 3);
 					}
 					i += 3;
 					if (newPosY >= 0 && newPosY <= 233) {
-						elmnt.style.top = newPosY + "px";
+						elmnt.style.top = newPosY + 'px';
 						bookCode = bookCode.substring(0, i) + newPosY.toString().padStart(3, '0') + bookCode.substring(i + 3);
 					}
 					break;
