@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TR Guide Editor</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<img id="book" src="guide.png"></img>
+<a id="page1"></a>
+<a id="page2"></a>
+<textarea id="input" spellcheck="false" rows="21" cols="34" autofocus></textarea>
+<button id="leftarrow"></button>
+<button id="rightarrow"></button>
+<script src="script.js"></script>
+<p id="hint">
+] Current Page: <a id="pagenum">0-1</a><br>
+] Use \xAABBBCCC for custom renderers (you can also use drag and drop with images)</br>
+&nbsp;&nbsp;(AA = id, BBB = X coordinates of the page, CCC = Y coordinates of the page);</br>
+] Use \r to reset text formatting, \q to go to a new line and \p to a new page;</br>
+] Use \CODE to use vanilla text formatting codes.</p>
+<img id="vanillahints" src="formatting_examples.webp"></img>
+</body>
+</html>

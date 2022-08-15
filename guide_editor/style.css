@@ -1,0 +1,79 @@
+@font-face {
+	font-family: 'MinecraftRegular';
+	src: url('MinecraftRegular.otf') format('opentype');
+}
+@font-face {
+	font-family: 'MinecraftBold';
+	src: url('MinecraftBold.otf') format('opentype');
+}
+* {
+	font-family: 'MinecraftRegular';
+	font-size: 7px;
+	margin: 0;
+	-ms-interpolation-mode: nearest-neighbor;
+	image-rendering: -webkit-optimize-contrast;
+	image-rendering: -webkit-crisp-edges;
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -o-crisp-edges;
+	image-rendering: pixelated;
+	-webkit-user-drag: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	user-drag: none;
+}
+html {
+	zoom: 2;
+	-moz-transform: scale(2);
+	-moz-transform-origin: 0 0;
+}
+img {
+	position: absolute;
+}
+#page1 {
+	top: 17px;
+	left: 24px;
+	position: absolute;
+}
+#page2 {
+	top: 17px;
+	left: 184px;
+	position: absolute;
+}
+#leftarrow {
+	background: url('arrow_left.png');
+	left: 26px;
+	top: 198px;
+	width: 20px;
+	height: 12px;
+	border: 0;
+	cursor: pointer;
+	position: absolute;
+}
+#rightarrow {
+	background: url('arrow_right.png');
+	left: 303px;
+	top: 198px;
+	width: 20px;
+	height: 12px;
+	border: 0;
+	cursor: pointer;
+	position: absolute;
+}
+#input {
+	overflow-y: scroll;
+	resize: none;
+	left: 360px;
+	top: 14px;
+	position: absolute;
+}
+#hint {
+	position: absolute;
+	top: 240px;
+}
+#vanillahints {
+	height: 153px;
+	left: 538px;
+	top: 30px;
+}
