@@ -46,12 +46,12 @@ window.onload = function() {
 		document.cookie = 'text=' + inputBox.value;
 		
 		caretTime++;
-		if (caretTime % 25 == 0) {
+		if (caretTime % 10 == 0) {
 			caretTime = 0;
 			caretOn = !caretOn;
 		}
 	}
-	setInterval(update, 20);
+	setInterval(update, 50);
 }
 
 function getCookie(name) {
@@ -66,11 +66,11 @@ function getCookie(name) {
 }
 
 function UrlEncodeBase64(base64Input) {
-	return base64Input.replace('+', '.').replace('/', '_').replace('=', '-');
+	return base64Input.replaceAll('+', '.').replaceAll('/', '_').replaceAll('=', '-');
 }
 
 function UrlDecodeBase64(encodedBase64Input) {
-	return encodedBase64Input.replace('.', '+').replace('_', '/').replace('-', '=');
+	return encodedBase64Input.replaceAll('.', '+').replaceAll('_', '/').replaceAll('-', '=');
 }
 
 function updateInOut(outDisplay) {
