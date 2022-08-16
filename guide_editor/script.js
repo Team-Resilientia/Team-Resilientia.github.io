@@ -6,18 +6,8 @@ var currentPage = 0;
 
 // ONLOAD AND LOOP
 window.onload = function() {
-	// Load data from cookies
+	// Load input from cookies
 	inputBox.value = getCookie('text');
-	let cookieImgs = getCookie('imgs');
-	let jsonImgs = JSON.parse(cookieImgs == '' ? '[]' : cookieImgs);
-	for (let i = 0; i < jsonImgs.length; i++) {
-		let newImg = document.createElement('img');
-		newImg.id = 'img' + jsonImgs[i].id;
-		newImg.src = 'data:image/png;base64,' + UrlDecodeBase64(jsonImgs[i].data);
-		newImg.style.display = 'none';
-		newImg.classList.add('movable');
-		document.getElementById('images').appendChild(newImg);
-	}
 	
 	function update() {
 		updateInOut(document.getElementById('page1'));
@@ -31,14 +21,6 @@ window.onload = function() {
 			let imgId = imgList[k].id.substring(3).padStart(2, '0');
 			if (!inputBox.value.includes('\\x' + imgId)) {
 				document.getElementById('images').removeChild(imgList[k]);
-				let cookieImgs = getCookie('imgs');
-				let jsonImgs = JSON.parse(cookieImgs == '' ? '[]' : cookieImgs);
-				for (let i = 0; i < jsonImgs.length; i++) {
-					if (jsonImgs[i].id == parseInt(imgId)) {
-						document.cookie = 'imgs=' + JSON.stringify(jsonImgs.splice(i, 1));
-						break;
-					}
-				}
 			}
 		}
 		
@@ -202,7 +184,7 @@ document.getElementById('leftarrow').onclick = function() {
 	}
 	document.getElementById('pagenum').innerHTML = currentPage.toString() + '-' + (currentPage + 1).toString();
 	flipAudio.play();
-}
+};
 document.getElementById('rightarrow').onclick = function() {
 	currentPage += 2;
 	let imgList = document.getElementById('images').childNodes;
@@ -211,7 +193,57 @@ document.getElementById('rightarrow').onclick = function() {
 	}
 	document.getElementById('pagenum').innerHTML = currentPage.toString() + '-' + (currentPage + 1).toString();
 	flipAudio.play();
-}
+};
+
+// OTHER BUTTONS
+document.getElementById('jsonLoader').onclick = function() {
+	let input = document.createElement('input');
+	input.type = 'file';
+
+	input.onchange = e => {
+		var file = e.target.files[0]; 
+
+		var reader = new FileReader();
+		reader.readAsText(file,'UTF-8');
+
+		reader.onload = readerEvent => {
+			var jsonImgs = JSON.parse(readerEvent.target.result);
+			for (let i = 0; i < jsonImgs.length; i++) {
+				let newImg = document.createElement('img');
+				newImg.id = 'img' + jsonImgs[i].id;
+				newImg.src = 'data:image/png;base64,' + UrlDecodeBase64(jsonImgs[i].data);
+				newImg.style.display = 'none';
+				newImg.classList.add('movable');
+				document.getElementById('images').appendChild(newImg);
+			}
+		}
+	}
+
+	input.click();
+};
+var saveData = (function () {
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    return function (data, fileName) {
+        var json = JSON.stringify(data),
+            blob = new Blob([json], {type: "octet/stream"}),
+            url = window.URL.createObjectURL(blob);
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        window.URL.revokeObjectURL(url);
+		document.body.removeChild(a);
+    };
+}());
+document.getElementById('jsonSaver').onclick = function() {
+	let jsonImgs = [];
+	let imgList = document.getElementById('images').childNodes;
+	for (let k = 0; k < imgList.length; k++) {
+		jsonImgs.push({id:parseInt(imgList[k].id.substring(3)),data:UrlEncodeBase64(imgList[k].src.replace('data:image/png;base64,', ''))});
+	}
+	saveData(jsonImgs, 'images.json');
+};
 
 // DRAG&DROP FEATURE
 document.getElementById('book').addEventListener('dragover', (event) => {
@@ -228,12 +260,6 @@ document.getElementById('book').addEventListener('drop', (event) => {
 		let newImg = document.createElement('img');
 		newImg.id = 'img' + document.getElementById('images').childElementCount;
 		newImg.src = loadEvent.target.result;
-		
-		// Save to cookies
-		let cookieImgs = getCookie('imgs');
-		let jsonImgs = JSON.parse(cookieImgs == '' ? '[]' : cookieImgs);
-		jsonImgs.push({id:parseInt(newImg.id.substring(3)),data:UrlEncodeBase64(newImg.src.replace('data:image/png;base64,', ''))});
-		document.cookie = 'imgs=' + JSON.stringify(jsonImgs);
 		
 		// Divide by 2 to apply page zoom
 		let xPos = Math.floor(Math.min(Math.max(event.pageX / 2, 0), 319));

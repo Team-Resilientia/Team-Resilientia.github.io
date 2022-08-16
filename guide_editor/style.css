@@ -61,6 +61,18 @@ img {
 	cursor: pointer;
 	position: absolute;
 }
+#jsonLoader {
+	position: absolute;
+	cursor: pointer;
+	left: 300px;
+	top: 255px;
+}
+#jsonSaver {
+	left: 304px;
+	top: 240px;
+	cursor: pointer;
+	position: absolute;
+}
 #input {
 	overflow-y: scroll;
 	resize: none;
