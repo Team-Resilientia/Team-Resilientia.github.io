@@ -196,6 +196,67 @@ document.getElementById('rightarrow').onclick = function() {
 };
 
 // OTHER BUTTONS
+function changeImagePos(elmnt, newPosX, newPosY) {
+	let bookCode = inputBox.value;
+	for (let i = 0; i < bookCode.length; i++) {
+		if ((i == 0 || bookCode[i - 1] != '\\') && i != bookCode.length - 1
+			&& bookCode[i] == '\\' && bookCode[i + 1] == 'x') {
+			i += 2;
+			if (parseInt(bookCode.substring(i, i + 2)) == parseInt(elmnt.id.substring(3))) {
+				i += 2;
+				if ((elmnt.offsetLeft < 160 && newPosX >= 0 && newPosX < 160) ||
+					(elmnt.offsetLeft >= 160 && newPosX >= 160 && newPosX <= 319)) {
+					elmnt.style.left = newPosX + 'px';
+					bookCode = bookCode.substring(0, i) + (newPosX >= 160 ? newPosX - 160 : newPosX).toString().padStart(3, '0') + bookCode.substring(i + 3);
+				}
+				i += 3;
+				if (newPosY >= 0 && newPosY <= 233) {
+					elmnt.style.top = newPosY + 'px';
+					bookCode = bookCode.substring(0, i) + newPosY.toString().padStart(3, '0') + bookCode.substring(i + 3);
+				}
+				break;
+			}
+		}
+	}
+	inputBox.value = bookCode;
+}
+function alignClickH(e) {
+	if (e.target.id == 'alignH') return;
+	document.querySelectorAll('*').forEach(function(node) {
+		node.classList.remove('crosscursor');
+		node.removeEventListener('click', alignClickH);
+	});
+	if (e.target.id.startsWith('img')) {
+		if (e.target.offsetLeft < 160) {
+			changeImagePos(e.target, 79 + 16 - e.target.naturalWidth / 2, e.target.offsetTop);
+		} else {
+			changeImagePos(e.target, 255 - e.target.naturalWidth / 2, e.target.offsetTop);
+		}
+	}
+}
+function alignClickV(e) {
+	if (e.target.id == 'alignV') return;
+	document.querySelectorAll('*').forEach(function(node) {
+		node.classList.remove('crosscursor');
+		node.removeEventListener('click', alignClickV);
+	});
+	if (e.target.id.startsWith('img')) {
+		changeImagePos(e.target, e.target.offsetLeft, 116 - e.target.naturalHeight / 2);
+	}
+}
+document.getElementById('alignH').onclick = function() {
+	document.querySelectorAll('*').forEach(function(node) {
+		node.classList.add('crosscursor');
+		node.addEventListener('click', alignClickH);
+	});
+};
+document.getElementById('alignV').onclick = function() {
+	document.querySelectorAll('*').forEach(function(node) {
+		node.classList.add('crosscursor');
+		node.addEventListener('click', alignClickV);
+	});
+};
+
 document.getElementById('jsonLoader').onclick = function() {
 	let input = document.createElement('input');
 	input.type = 'file';
@@ -316,28 +377,7 @@ function makeDraggable(elmnt) {
 		e.preventDefault();
 		let newPosX = Math.floor(e.clientX / 2 - startMousePosX);
 		let newPosY = Math.floor(e.clientY / 2 - startMousePosY);
-		let bookCode = inputBox.value;
-		for (let i = 0; i < bookCode.length; i++) {
-			if ((i == 0 || bookCode[i - 1] != '\\') && i != bookCode.length - 1
-				&& bookCode[i] == '\\' && bookCode[i + 1] == 'x') {
-				i += 2;
-				if (parseInt(bookCode.substring(i, i + 2)) == parseInt(elmnt.id.substring(3))) {
-					i += 2;
-					if ((elmnt.offsetLeft < 160 && newPosX >= 0 && newPosX < 160) ||
-						(elmnt.offsetLeft >= 160 && newPosX >= 160 && newPosX <= 319)) {
-						elmnt.style.left = newPosX + 'px';
-						bookCode = bookCode.substring(0, i) + (newPosX >= 160 ? newPosX - 160 : newPosX).toString().padStart(3, '0') + bookCode.substring(i + 3);
-					}
-					i += 3;
-					if (newPosY >= 0 && newPosY <= 233) {
-						elmnt.style.top = newPosY + 'px';
-						bookCode = bookCode.substring(0, i) + newPosY.toString().padStart(3, '0') + bookCode.substring(i + 3);
-					}
-					break;
-				}
-			}
-		}
-		inputBox.value = bookCode;
+		changeImagePos(elmnt, newPosX, newPosY);
 	}
 
 	function closeDragElement() {
