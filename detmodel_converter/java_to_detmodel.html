@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Java code to .detmodel</title>
+<style>textarea { width: 600px; height: 250px }</style>
+<script>
+function convert() {
+	var code = document.getElementById('input').value;
+	document.getElementById('output').value = code.replace(/(?<=;).*\n?|\t|(this\.?)addVertex\(|f|\)|\s/g, '');
+}
+</script>
+</head>
+
+<body>
+<textarea id="input"></textarea>
+<br><button onclick="convert();">Convert</button><br>
+<textarea id="output" readonly></textarea>
+</body>
+
+</html>

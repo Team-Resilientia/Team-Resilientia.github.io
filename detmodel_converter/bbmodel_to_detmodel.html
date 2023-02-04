@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>.bbmodel to .detmodel</title>
+<style>textarea { width: 600px; height: 250px }</style>
+<script>
+function convert() {
+	var jsonT = JSON.parse(document.getElementById('input').value);
+	var detmod = "";
+	for (var face in jsonT.elements[0].faces) {
+		var verts = 0;
+		var x, y, z, u, v;
+		for (var vert in jsonT.elements[0].faces[face].uv) {
+			verts++;
+			u = jsonT.elements[0].faces[face].uv[vert][0];
+			v = jsonT.elements[0].faces[face].uv[vert][1];
+			for (var vertPos in jsonT.elements[0].vertices) {
+				if (vertPos == vert) {
+					x = jsonT.elements[0].vertices[vertPos][0];
+					y = jsonT.elements[0].vertices[vertPos][1];
+					z = jsonT.elements[0].vertices[vertPos][2];
+				}
+			}
+			detmod += `${x},${y},${z},${u},${v};`;
+		}
+		if (verts > 4) {
+			console.error(face + " has " + verts + " vertices.");
+		} else if (verts < 4 && verts != 0) {
+			console.warn(face + " has " + verts + " vertices. Fixing by adding more vertices...");
+			while(verts < 4) {
+				detmod += `${x},${y},${z},${u},${v};`;
+				verts++;
+			}
+		}
+	}
+	document.getElementById('output').value = detmod;
+}
+</script>
+</head>
+
+<body>
+<textarea id="input"></textarea>
+<br><button onclick="convert();">Convert</button><br>
+<textarea id="output" readonly></textarea>
+</body>
+
+</html>
