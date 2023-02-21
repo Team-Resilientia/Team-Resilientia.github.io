@@ -7,7 +7,7 @@ var currentPage = 0;
 // ONLOAD AND LOOP
 window.onload = function() {
 	// Load input from cookies
-	inputBox.value = getCookie('text');
+	inputBox.value = atob(UrlDecodeBase64(getCookie('text')));
 	
 	function update() {
 		updateInOut(document.getElementById('page1'));
@@ -25,7 +25,7 @@ window.onload = function() {
 		}
 		
 		// Save input to cookies
-		document.cookie = 'text=' + inputBox.value;
+		document.cookie = 'text=' + btoa(UrlEncodeBase64(inputBox.value));
 		
 		caretTime++;
 		if (caretTime % 10 == 0) {
