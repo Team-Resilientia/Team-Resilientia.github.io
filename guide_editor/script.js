@@ -36,6 +36,14 @@ window.onload = function() {
 	setInterval(update, 50);
 }
 
+function UrlEncodeBase64(base64Input) {
+	return base64Input.replaceAll('+', '.').replaceAll('/', '_').replaceAll('=', '-');
+}
+
+function UrlDecodeBase64(encodedBase64Input) {
+	return encodedBase64Input.replaceAll('.', '+').replaceAll('_', '/').replaceAll('-', '=');
+}
+
 function updateInOut(outDisplay) {
 	let bookCode = inputBox.value;
 	let displayedTxt = '<a>';
