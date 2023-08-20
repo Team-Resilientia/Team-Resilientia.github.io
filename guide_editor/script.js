@@ -6,8 +6,8 @@ var currentPage = 0;
 
 // ONLOAD AND LOOP
 window.onload = function() {
-	// Load input from cookies
-	inputBox.value = atob(UrlDecodeBase64(getCookie('text')));
+	// Load input from localStorage
+	inputBox.value = localStorage.getItem("text");
 	
 	function update() {
 		updateInOut(document.getElementById('page1'));
@@ -24,8 +24,8 @@ window.onload = function() {
 			}
 		}
 		
-		// Save input to cookies
-		document.cookie = 'text=' + btoa(UrlEncodeBase64(inputBox.value));
+		// Save input in localStorage
+		localStorage.setItem("text", inputBox.value);
 		
 		caretTime++;
 		if (caretTime % 10 == 0) {
@@ -34,25 +34,6 @@ window.onload = function() {
 		}
 	}
 	setInterval(update, 50);
-}
-
-function getCookie(name) {
-    var nameEQ = name + '=';
-    var ca = document.cookie.split(';');
-    for(var i=0;i < ca.length;i++) {
-        var c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1,c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-    }
-    return '';
-}
-
-function UrlEncodeBase64(base64Input) {
-	return base64Input.replaceAll('+', '.').replaceAll('/', '_').replaceAll('=', '-');
-}
-
-function UrlDecodeBase64(encodedBase64Input) {
-	return encodedBase64Input.replaceAll('.', '+').replaceAll('_', '/').replaceAll('-', '=');
 }
 
 function updateInOut(outDisplay) {
