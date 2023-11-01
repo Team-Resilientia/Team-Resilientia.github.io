@@ -172,6 +172,7 @@ document.getElementById('leftarrow').onclick = function() {
 		imgList[k].style.display = 'none';
 	}
 	document.getElementById('pagenum').innerHTML = currentPage.toString() + '-' + (currentPage + 1).toString();
+	flipAudio.currentTime = 0;
 	flipAudio.play();
 };
 document.getElementById('rightarrow').onclick = function() {
@@ -181,6 +182,7 @@ document.getElementById('rightarrow').onclick = function() {
 		imgList[k].style.display = 'none';
 	}
 	document.getElementById('pagenum').innerHTML = currentPage.toString() + '-' + (currentPage + 1).toString();
+	flipAudio.currentTime = 0;
 	flipAudio.play();
 };
 
